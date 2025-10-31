@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="catalog-jvm">
+    <output-path>$PROJECT_DIR$/catalog/build/libs</output-path>
+    <root id="archive" name="catalog-jvm.jar">
+      <element id="module-output" name="Glass.catalog.jvmMain" />
+    </root>
+  </artifact>
+</component>

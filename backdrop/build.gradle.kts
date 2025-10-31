@@ -1,74 +1,49 @@
+import com.android.build.api.dsl.androidLibrary
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.android.multiplatform.library)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.compose)
-    id("com.vanniktech.maven.publish")
+    alias(libs.plugins.compose.multiplatform)
 }
 
-android {
-    namespace = "com.kyant.backdrop"
-    compileSdk = 36
-    buildToolsVersion = "36.1.0"
-
-    defaultConfig {
+kotlin {
+    androidLibrary {
+        namespace = "com.kyant.backdrop"
+        compileSdk = 36
+        buildToolsVersion = "36.1.0"
         minSdk = 21
-        consumerProguardFiles("consumer-rules.pro")
-    }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-    }
-    kotlin {
-        jvmToolchain(21)
+        withJava()
         compilerOptions {
-            freeCompilerArgs.addAll(
-                "-Xcontext-parameters"
-            )
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
-    buildFeatures {
-        compose = true
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    jvm()
+
+    applyDefaultHierarchyTemplate()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(compose.ui)
+            implementation(compose.foundation)
+            implementation(libs.compose.ui.graphics)
+        }
+        val skikoMain by creating {
+            dependsOn(commonMain.get())
+        }
+        iosMain.get().dependsOn(skikoMain)
+        jvmMain.get().dependsOn(skikoMain)
     }
-}
 
-dependencies {
-    implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-}
-
-mavenPublishing {
-    publishToMavenCentral()
-    signAllPublications()
-
-    coordinates("io.github.kyant0", "backdrop", "1.0.0")
-
-    pom {
-        name.set("Backdrop")
-        description.set("Jetpack Compose blur and Liquid Glass effects")
-        inceptionYear.set("2025")
-        url.set("https://github.com/Kyant0/AndroidLiquidGlass")
-        licenses {
-            license {
-                name.set("The Apache License, Version 2.0")
-                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                distribution.set("repo")
-            }
-        }
-        developers {
-            developer {
-                id.set("Kyant0")
-                name.set("Kyant")
-                url.set("https://github.com/Kyant0")
-            }
-        }
-        scm {
-            url.set("https://github.com/Kyant0/AndroidLiquidGlass")
-            connection.set("scm:git:git://github.com/Kyant0/AndroidLiquidGlass.git")
-            developerConnection.set("scm:git:ssh://git@github.com/Kyant0/AndroidLiquidGlass.git")
-        }
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-Xcontext-parameters",
+            "-Xexpect-actual-classes"
+        )
     }
 }
